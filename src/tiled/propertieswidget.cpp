@@ -2031,6 +2031,18 @@ public:
         mProbabilityProperty->setToolTip(tr("Relative chance this tile will be picked"));
         mProbabilityProperty->setMinimum(0.0);
 
+        mPivotProperty = new PointProperty(
+                    tr("Pivot"),
+                    [this] { return tile()->pivot(); },
+                    [this](const QPoint &value) {
+                        push(new ChangeTilePivot(tilesetDocument(),
+                                                 tilesetDocument()->selectedTiles(),
+                                                 value));
+                    });
+        mPivotProperty->setToolTip(tr("Point of the tile image that is kept aligned "
+                                      "with the position of the tile"));
+        mPivotProperty->setSuffix(tr("px"));
+
         mTileProperties = new GroupProperty(tr("Tile"));
         mTileProperties->addProperty(mIdProperty);
         mTileProperties->addProperty(mClassProperty);
@@ -2041,6 +2053,7 @@ public:
 
         mTileProperties->addProperty(mRectangleProperty);
         mTileProperties->addProperty(mProbabilityProperty);
+        mTileProperties->addProperty(mPivotProperty);
 
         addProperty(mTileProperties);
 
@@ -2051,12 +2064,18 @@ public:
 
             connect(tilesetDocument, &TilesetDocument::tileProbabilityChanged,
                     this, &TileProperties::tileProbabilityChanged);
+
+            connect(tilesetDocument, &TilesetDocument::tilePivotChanged,
+                    this, &TileProperties::tilePivotChanged);
         } else if (auto mapDocument = qobject_cast<MapDocument*>(document)) {
             connect(mapDocument, &MapDocument::tileImageSourceChanged,
                     this, &TileProperties::tileImageSourceChanged);
 
             connect(mapDocument, &MapDocument::tileProbabilityChanged,
                     this, &TileProperties::tileProbabilityChanged);
+
+            connect(mapDocument, &MapDocument::tilePivotChanged,
+                    this, &TileProperties::tilePivotChanged);
         }
 
         updateEnabledState();
@@ -2079,6 +2098,13 @@ private:
         emit mProbabilityProperty->valueChanged();
     }
 
+    void tilePivotChanged(Tile *tile)
+    {
+        if (tile != this->tile())
+            return;
+        emit mPivotProperty->valueChanged();
+    }
+
     void updateEnabledState()
     {
         const bool hasTilesetDocument = tilesetDocument();
@@ -2087,6 +2113,7 @@ private:
         mImageProperty->setEnabled(hasTilesetDocument && isCollection);
         mRectangleProperty->setEnabled(hasTilesetDocument && isCollection);
         mProbabilityProperty->setEnabled(hasTilesetDocument);
+        mPivotProperty->setEnabled(hasTilesetDocument);
     }
 
     TilesetDocument *tilesetDocument() const
@@ -2104,6 +2131,7 @@ private:
     UrlProperty *mImageProperty;
     RectProperty *mRectangleProperty;
     FloatProperty *mProbabilityProperty;
+    PointProperty *mPivotProperty;
 };
 
 class WangSetProperties : public ObjectProperties

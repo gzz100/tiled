@@ -34,6 +34,7 @@
 
 #include <QColor>
 #include <QList>
+#include <QMargins>
 #include <QPixmap>
 #include <QPoint>
 #include <QSharedPointer>
@@ -161,6 +162,16 @@ public:
 
     QPoint tileOffset() const;
     void setTileOffset(QPoint offset);
+
+    /**
+     * Returns the margins needed to draw the tiles in this tileset, taking into
+     * account the tile offset of the tileset and the pivots of its tiles.
+     *
+     * These margins are combined with the draw margins of the tile layers and
+     * maps that use this tileset.
+     */
+    QMargins drawMargins() const;
+    void invalidateDrawMargins();
 
     Orientation orientation() const;
     void setOrientation(Orientation orientation);
@@ -323,6 +334,9 @@ private:
     QString mFormat;
     TransformationFlags mTransformationFlags;
 
+    mutable QMargins mDrawMargins;
+    mutable bool mDrawMarginsDirty = true;
+
     QWeakPointer<Tileset> mOriginalTileset;
 };
 
@@ -458,7 +472,23 @@ inline QPoint Tileset::tileOffset() const
  */
 inline void Tileset::setTileOffset(QPoint offset)
 {
+    if (mTileOffset == offset)
+        return;
+
     mTileOffset = offset;
+    invalidateDrawMargins();
+}
+
+/**
+ * Invalidates the cached draw margins, which need to be recomputed on the next
+ * call to drawMargins.
+ *
+ * This is called automatically when the tile offset of the tileset or the pivot
+ * of one of its tiles changes.
+ */
+inline void Tileset::invalidateDrawMargins()
+{
+    mDrawMarginsDirty = true;
 }
 
 /**

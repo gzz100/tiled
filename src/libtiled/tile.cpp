@@ -39,6 +39,7 @@ Tile::Tile(int id, Tileset *tileset):
     Object(TileType),
     mId(id),
     mTileset(tileset),
+    mPivot(0, 0),
     mImageStatus(LoadingReady),
     mProbability(1.0),
     mCurrentFrameIndex(0),
@@ -50,6 +51,7 @@ Tile::Tile(const QPixmap &image, int id, Tileset *tileset):
     mId(id),
     mTileset(tileset),
     mImage(image),
+    mPivot(0, 0),
     mImageStatus(image.isNull() ? LoadingError : LoadingReady),
     mProbability(1.0),
     mCurrentFrameIndex(0),
@@ -158,6 +160,22 @@ QPoint Tile::offset() const
 }
 
 /**
+ * Sets the pivot of this tile, in pixels relative to the top-left corner of its
+ * image. The pivot point of the image is kept aligned with the position of the
+ * tile on the map.
+ */
+void Tile::setPivot(const QPoint &pivot)
+{
+    if (mPivot == pivot)
+        return;
+
+    mPivot = pivot;
+
+    if (mTileset)
+        mTileset->invalidateDrawMargins();
+}
+
+/**
  * Sets \a objectGroup to be the group of objects associated with this tile.
  * The Tile takes ownership over the ObjectGroup and it can't also be part of
  * a map.
@@ -245,6 +263,7 @@ Tile *Tile::clone(Tileset *tileset) const
 
     c->mImageSource = mImageSource;
     c->mImageRect = mImageRect;
+    c->mPivot = mPivot;
     c->mImageStatus = mImageStatus;
     c->mProbability = mProbability;
 
@@ -257,3 +276,61 @@ Tile *Tile::clone(Tileset *tileset) const
 
     return c;
 }
+
+namespace Tiled {
+
+const char * const pivotXPropertyName = "pivotx";
+const char * const pivotYPropertyName = "pivoty";
+
+/**
+ * Takes the value of the property with the given \a name out of \a properties,
+ * when it is a number. Properties that can't be interpreted as a number are
+ * left alone, so they are not lost when they were not meant as a pivot.
+ */
+static bool takePivotValue(Properties &properties, const char *name, int &value)
+{
+    auto it = properties.find(QLatin1String(name));
+
+    if (it == properties.end())
+        return false;
+
+    bool ok = false;
+    const int number = qRound(it.value().toDouble(&ok));
+
+    if (!ok)
+        return false;
+
+    properties.erase(it);
+    value = number;
+
+    return true;
+}
+
+std::optional<QPoint> takePivotFromProperties(Properties &properties)
+{
+    int x = 0;
+    int y = 0;
+
+    const bool hasX = takePivotValue(properties, pivotXPropertyName, x);
+    const bool hasY = takePivotValue(properties, pivotYPropertyName, y);
+
+    if (!hasX && !hasY)
+        return std::nullopt;
+
+    return QPoint(x, y);
+}
+
+void addPivotToProperties(const QPoint &pivot, Properties &properties)
+{
+    if (pivot.isNull()) {
+        properties.remove(QLatin1String(pivotXPropertyName));
+        properties.remove(QLatin1String(pivotYPropertyName));
+        return;
+    }
+
+    properties.insert(QLatin1String(pivotXPropertyName), pivot.x());
+    properties.insert(QLatin1String(pivotYPropertyName), pivot.y());
+}
+
+} // namespace Tiled
+

@@ -157,7 +157,7 @@ QRectF MapObject::screenBounds(const MapRenderer &renderer) const
 
         if (const Tile *tile = mCell.tile()) {
             imgSize = tile->size();
-            tileOffset = tile->offset();
+            tileOffset = tile->drawOffset();
         } else {
             imgSize = size();
         }
@@ -220,7 +220,7 @@ QPainterPath MapObject::tileObjectShape(const Map *map) const
     transform.scale(mSize.width() / tileSize.width(),
                     mSize.height() / tileSize.height());
 
-    const QPointF tileOffset = tile->offset();
+    const QPointF tileOffset = tile->drawOffset();
     transform.translate(tileOffset.x(), tileOffset.y());
 
     if (mCell.flippedHorizontally() || mCell.flippedVertically()) {

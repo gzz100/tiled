@@ -465,7 +465,7 @@ void CellRenderer::render(const Cell &cell, const QPointF &screenPos, const QSiz
     if (needsTint(mTintColor))
         imageRect.moveTopLeft(QPoint(0, 0));
 
-    const QPoint offset = tile->offset();
+    const QPoint offset = tile->drawOffset();
     const QPointF sizeHalf { size.width() / 2, size.height() / 2 };
 
     bool flippedHorizontally = cell.flippedHorizontally();

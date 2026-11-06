@@ -155,10 +155,29 @@ void TileDelegate::paint(QPainter *painter,
         if (zoomable->smoothTransform())
             painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (!tileImage.isNull())
-        painter->drawPixmap(targetRect, tileImage, tile->imageRect());
-    else
+    if (!tileImage.isNull()) {
+        const QPoint pivot = tile->pivot();
+        const QRect sourceRect = tile->imageRect();
+
+        if (!pivot.isNull() && !sourceRect.isEmpty()) {
+            // The pivot moves the image relative to the position of the tile,
+            // which is the top-left corner of the item in this view
+            const qreal scaleX = targetRect.width() / qreal(sourceRect.width());
+            const qreal scaleY = targetRect.height() / qreal(sourceRect.height());
+
+            painter->save();
+            painter->setClipRect(option.rect);
+            painter->drawPixmap(targetRect.translated(qRound(-pivot.x() * scaleX),
+                                                      qRound(-pivot.y() * scaleY)),
+                                tileImage,
+                                sourceRect);
+            painter->restore();
+        } else {
+            painter->drawPixmap(targetRect, tileImage, sourceRect);
+        }
+    } else {
         mTilesetView->imageMissingIcon().paint(painter, targetRect, Qt::AlignBottom | Qt::AlignLeft);
+    }
 
 
     // Overlay with film strip when animated

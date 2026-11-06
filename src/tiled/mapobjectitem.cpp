@@ -239,7 +239,8 @@ QTransform MapObjectItem::tileCollisionObjectsTransform(const Tile &tile) const
     if (mMapDocument->map()->orientation() == Map::Isometric)
         tileTransform.translate(-tile.width() / 2, 0.0);
 
-    tileTransform.translate(tileset->tileOffset().x(), tileset->tileOffset().y());
+    const QPoint drawOffset = tile.drawOffset();
+    tileTransform.translate(drawOffset.x(), drawOffset.y());
 
     if (mObject->cell().flippedVertically()) {
         tileTransform.scale(1, -1);

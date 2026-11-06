@@ -150,12 +150,8 @@ void Map::recomputeDrawMargins() const
         maxTileSize = std::max(maxTileSize, std::max(tileSize.width(),
                                                      tileSize.height()));
 
-        const QPoint offset = tileset->tileOffset();
-        offsetMargins = maxMargins(QMargins(-offset.x(),
-                                            -offset.y(),
-                                            offset.x(),
-                                            offset.y()),
-                                   offsetMargins);
+        // Takes the tile offset of the tileset and the pivots into account
+        offsetMargins = maxMargins(tileset->drawMargins(), offsetMargins);
     }
 
     // We subtract the tile size of the map, since that part does not

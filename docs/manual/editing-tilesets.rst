@@ -127,6 +127,23 @@ Image
    Only relevant for tiles that are part of image collection tilesets,
    this shows the image file of the tile and allows you to change it.
 
+.. raw:: html
+
+   <div class="new new-prev">Since Tiled 1.12</div>
+
+Pivot
+   The pivot point of the tile, in pixels relative to the top-left corner of
+   its image. The pivot point of the image is kept aligned with the position
+   of the tile on the map, so changing it moves the image relative to the
+   grid. This is useful for tiles whose image does not align with the grid in
+   the way you need.
+
+   The default pivot is (0, 0), which draws the image in its usual place. The
+   pivot is applied in addition to the *Drawing Offset* of the tileset.
+
+   The pivot is saved using the ``pivotx`` and ``pivoty`` custom properties of
+   the tile, so your game or tool can read it from the tileset file.
+
 .. _terrain-information:
 
 Terrain Information

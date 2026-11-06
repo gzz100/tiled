@@ -312,6 +312,8 @@ static bool includeTile(const Tile *tile)
         return true;
     if (tile->probability() != 1.0)
         return true;
+    if (!tile->pivot().isNull())
+        return true;
 
     return false;
 }
@@ -418,8 +420,11 @@ void LuaWriter::writeTileset(const Tileset &tileset,
                                      tile->className());
         }
 
-        if (!tile->properties().isEmpty())
-            writeProperties(tile->properties());
+        Properties properties = tile->properties();
+        addPivotToProperties(tile->pivot(), properties);
+
+        if (!properties.isEmpty())
+            writeProperties(properties);
 
         if (!tile->imageSource().isEmpty()) {
             const QString src = toFileReference(tile->imageSource(), mDir);

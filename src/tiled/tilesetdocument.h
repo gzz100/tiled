@@ -113,6 +113,7 @@ public:
 
     void setTileImage(Tile *tile, const QPixmap &image, const QUrl &source);
     void setTileProbability(Tile *tile, qreal probability);
+    void setTilePivot(Tile *tile, QPoint pivot);
     void swapTileObjectGroup(Tile *tile, std::unique_ptr<ObjectGroup> &objectGroup);
 
     void checkIssues() override;
@@ -148,6 +149,11 @@ signals:
      * Emitted when the probability of a tile changed.
      */
     void tileProbabilityChanged(Tile *tile);
+
+    /**
+     * Emitted when the pivot of a tile changed.
+     */
+    void tilePivotChanged(Tile *tile);
 
     /**
      * Notifies the TileCollisionDock about the object group of a tile changing.

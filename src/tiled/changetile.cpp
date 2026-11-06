@@ -84,4 +84,34 @@ void ChangeTileImageRect::setValue(Tile *tile, const QRect &rect) const
         emit mapDocument->tileImageSourceChanged(tile);
 }
 
+ChangeTilePivot::ChangeTilePivot(TilesetDocument *tilesetDocument,
+                                 const QList<Tile *> &tiles,
+                                 const QPoint &pivot,
+                                 QUndoCommand *parent)
+    : ChangeValue(tilesetDocument, tiles, pivot, parent)
+{
+    setText(QCoreApplication::translate("Undo Commands",
+                                        "Change Tile Pivot"));
+}
+
+ChangeTilePivot::ChangeTilePivot(TilesetDocument *tilesetDocument,
+                                 const QList<Tile *> &tiles,
+                                 const QVector<QPoint> &pivots,
+                                 QUndoCommand *parent)
+    : ChangeValue(tilesetDocument, tiles, pivots, parent)
+{
+    setText(QCoreApplication::translate("Undo Commands",
+                                        "Change Tile Pivot"));
+}
+
+QPoint ChangeTilePivot::getValue(const Tile *tile) const
+{
+    return tile->pivot();
+}
+
+void ChangeTilePivot::setValue(Tile *tile, const QPoint &pivot) const
+{
+    static_cast<TilesetDocument*>(document())->setTilePivot(tile, pivot);
+}
+
 } // namespace Tiled

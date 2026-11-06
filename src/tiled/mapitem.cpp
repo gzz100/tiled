@@ -621,7 +621,7 @@ void MapItem::imageLayerChanged(ImageLayer *imageLayer)
 
 /**
  * This function should be called when any tiles in the given tileset may have
- * changed their size or offset or image.
+ * changed their size or offset or image or pivot.
  */
 void MapItem::adaptToTilesetTileSizeChanges(Tileset *tileset)
 {
@@ -634,6 +634,9 @@ void MapItem::adaptToTilesetTileSizeChanges(Tileset *tileset)
         if (cell.tileset() == tileset)
             item->syncWithMapObject();
     }
+
+    // The margins of the map may have changed along with the tile size or offset
+    updateBoundingRect();
 }
 
 void MapItem::adaptToTileSizeChanges(Tile *tile)

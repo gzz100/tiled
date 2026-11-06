@@ -302,6 +302,8 @@ static bool includeTile(const Tile *tile)
         return true;
     if (tile->probability() != 1.0)
         return true;
+    if (!tile->pivot().isNull())
+        return true;
 
     return false;
 }
@@ -444,8 +446,10 @@ void MapWriterPrivate::writeTileset(QXmlStreamWriter &w, const Tileset &tileset,
                 w.writeAttribute(FileFormat::classPropertyNameForObject(), tile->className());
             if (tile->probability() != 1.0)
                 w.writeAttribute(QStringLiteral("probability"), QString::number(tile->probability()));
-            if (!tile->properties().isEmpty())
-                writeProperties(w, tile->properties());
+            Properties properties = tile->properties();
+            addPivotToProperties(tile->pivot(), properties);
+            if (!properties.isEmpty())
+                writeProperties(w, properties);
             if (isCollection)
                 writeImage(w, tile->imageSource(), tile->image(), QColor(), tile->size());
             if (tile->objectGroup())

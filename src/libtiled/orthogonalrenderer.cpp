@@ -58,7 +58,7 @@ QRectF OrthogonalRenderer::boundingRect(const MapObject *object) const
 
     if (!object->cell().isEmpty()) {
         if (const Tile *tile = object->cell().tile()) {
-            QPointF tileOffset = tile->offset();
+            QPointF tileOffset = tile->drawOffset();
             const QSize tileSize = tile->size();
             if (!tileSize.isNull()) {
                 const QSizeF scale {
@@ -137,7 +137,7 @@ QPainterPath OrthogonalRenderer::shape(const MapObject *object) const
             path.addRect(object->x() - 10, object->y() - 10, 20, 20);
         } else {
             if (const Tile *tile = object->cell().tile()) {
-                QPointF tileOffset = tile->offset();
+                QPointF tileOffset = tile->drawOffset();
                 const QSize tileSize = tile->size();
                 if (!tileSize.isNull()) {
                     const QSizeF scale {
@@ -361,7 +361,7 @@ void OrthogonalRenderer::drawMapObject(QPainter *painter,
 
         if (testFlag(ShowTileObjectOutlines)) {
             if (const Tile *tile = object->cell().tile()) {
-                QPointF tileOffset = tile->offset();
+                QPointF tileOffset = tile->drawOffset();
                 const QSize tileSize = tile->size();
                 if (!tileSize.isNull()) {
                     const QSizeF scale {

@@ -42,6 +42,8 @@ TilesetModel::TilesetModel(TilesetDocument *tilesetDocument, QObject *parent)
             this, &TilesetModel::tileChanged);
     connect(tilesetDocument, &TilesetDocument::tileAnimationChanged,
             this, &TilesetModel::tileChanged);
+    connect(tilesetDocument, &TilesetDocument::tilePivotChanged,
+            this, &TilesetModel::tileChanged);
 }
 
 /**

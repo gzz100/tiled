@@ -147,19 +147,14 @@ static QMargins computeDrawMargins(const QSet<SharedTileset> &tilesets)
     QMargins offsetMargins;
 
     for (const SharedTileset &tileset : tilesets) {
-        const QPoint offset = tileset->tileOffset();
-
         if (tileset->tileRenderSize() == Tileset::TileSize) {
             const QSize tileSize = tileset->tileSize();
             maxTileSize = std::max(maxTileSize, std::max(tileSize.width(),
                                                          tileSize.height()));
         }
 
-        offsetMargins = maxMargins(QMargins(-offset.x(),
-                                            -offset.y(),
-                                            offset.x(),
-                                            offset.y()),
-                                   offsetMargins);
+        // Takes the tile offset of the tileset and the pivots into account
+        offsetMargins = maxMargins(tileset->drawMargins(), offsetMargins);
     }
 
     // Adding maxTileSize to top-right of the margins assumes a bottom-left tile

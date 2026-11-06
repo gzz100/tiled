@@ -899,7 +899,7 @@ static QRectF objectBounds(const MapObject *object,
 
         if (const Tile *tile = object->cell().tile()) {
             imgSize = tile->size();
-            tileOffset = tile->offset();
+            tileOffset = tile->drawOffset();
         } else {
             imgSize = object->size();
         }

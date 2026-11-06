@@ -123,6 +123,7 @@ Tile *Tileset::findOrCreateTile(int id)
     auto tile = new Tile(id, this);
     mTilesById[id] = tile;
     mTiles.append(tile);
+    invalidateDrawMargins();
 
     return tile;
 }
@@ -424,6 +425,31 @@ std::unique_ptr<WangSet> Tileset::takeWangSetAt(int index)
 }
 
 /**
+ * Returns the margins needed to draw the tiles in this tileset, taking into
+ * account the tile offset of the tileset and the pivots of its tiles.
+ */
+QMargins Tileset::drawMargins() const
+{
+    if (mDrawMarginsDirty) {
+        QMargins margins(-mTileOffset.x(), -mTileOffset.y(),
+                         mTileOffset.x(), mTileOffset.y());
+
+        for (const Tile *tile : mTiles) {
+            // The pivot offsets the tile image relative to the tile position
+            const QPoint offset = mTileOffset - tile->pivot();
+            margins = maxMargins(QMargins(-offset.x(), -offset.y(),
+                                          offset.x(), offset.y()),
+                                 margins);
+        }
+
+        mDrawMargins = margins;
+        mDrawMarginsDirty = false;
+    }
+
+    return mDrawMargins;
+}
+
+/**
  * Adds a new tile to the end of the tileset.
  */
 Tile *Tileset::addTile(const QPixmap &image, const QUrl &source, const QRect &rect)
@@ -439,6 +465,7 @@ Tile *Tileset::addTile(const QPixmap &image, const QUrl &source, const QRect &re
         mTileHeight = newTile->height();
     if (mTileWidth < newTile->width())
         mTileWidth = newTile->width();
+    invalidateDrawMargins();
     return newTile;
 }
 
@@ -482,6 +509,7 @@ void Tileset::deleteTile(int id)
     auto tile = mTilesById.take(id);
     mTiles.removeOne(tile);
     delete tile;
+    invalidateDrawMargins();
 }
 
 /**
@@ -634,6 +662,9 @@ void Tileset::swap(Tileset &other)
         tile->mTileset = &other;
     for (auto wangSet : std::as_const(other.mWangSets))
         wangSet->setTileset(&other);
+
+    invalidateDrawMargins();
+    other.invalidateDrawMargins();
 }
 
 SharedTileset Tileset::clone() const
@@ -692,6 +723,7 @@ void Tileset::updateTileSize()
     }
     mTileWidth = maxWidth;
     mTileHeight = maxHeight;
+    invalidateDrawMargins();
 }
 
 

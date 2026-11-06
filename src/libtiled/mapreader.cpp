@@ -543,7 +543,10 @@ void MapReaderPrivate::readTilesetTile(Tileset &tileset)
 
     while (xml.readNextStartElement()) {
         if (xml.name() == QLatin1String("properties")) {
-            tile->mergeProperties(readProperties());
+            Properties properties = readProperties();
+            if (auto pivot = takePivotFromProperties(properties))
+                tile->setPivot(*pivot);
+            tile->mergeProperties(properties);
         } else if (xml.name() == QLatin1String("image")) {
             ImageReference imageReference = readImage();
             if (imageReference.hasImage()) {

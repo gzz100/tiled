@@ -73,7 +73,7 @@ QRectF IsometricRenderer::boundingRect(const MapObject *object) const
         bounds.translate(-alignmentOffset(bounds, object->alignment(map())));
 
         if (const Tile *tile = object->cell().tile()) {
-            QPointF tileOffset = tile->offset();
+            QPointF tileOffset = tile->drawOffset();
             const QSize tileSize = tile->size();
             if (!tileSize.isNull()) {
                 const QSizeF scale {
@@ -357,7 +357,7 @@ void IsometricRenderer::drawMapObject(QPainter *painter,
 
         if (testFlag(ShowTileObjectOutlines)) {
             if (const Tile *tile = object->cell().tile()) {
-                QPointF tileOffset = tile->offset();
+                QPointF tileOffset = tile->drawOffset();
                 const QSize tileSize = tile->size();
                 if (!tileSize.isNull()) {
                     const QSizeF scale {

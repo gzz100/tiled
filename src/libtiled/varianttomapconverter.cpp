@@ -434,8 +434,11 @@ SharedTileset VariantToMapConverter::toTileset(const QVariant &variant)
         const int tileId = it.key().toInt();
         const QVariant &propertiesVar = it.value();
         const QVariant propertyTypesVar = propertyTypesVariantMap.value(it.key());
-        const Properties properties = toProperties(propertiesVar, propertyTypesVar);
-        tileset->findOrCreateTile(tileId)->setProperties(properties);
+        Properties properties = toProperties(propertiesVar, propertyTypesVar);
+        Tile *tile = tileset->findOrCreateTile(tileId);
+        if (auto pivot = takePivotFromProperties(properties))
+            tile->setPivot(*pivot);
+        tile->setProperties(properties);
     }
 
     if (!tilesVariantMap.isEmpty() || !propertiesVariantMap.isEmpty()) {
@@ -456,7 +459,10 @@ SharedTileset VariantToMapConverter::toTileset(const QVariant &variant)
         }
         Tile *tile = tileset->findOrCreateTile(tileId);
         readTile(tile, tileVar);
-        tile->setProperties(extractProperties(tileVar));
+        Properties properties = extractProperties(tileVar);
+        if (auto pivot = takePivotFromProperties(properties))
+            tile->setPivot(*pivot);
+        tile->setProperties(properties);
     }
 
     // Read Wang sets

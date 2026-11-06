@@ -427,6 +427,27 @@ void TilesetDocument::setTileProbability(Tile *tile, qreal probability)
         emit mapDocument->tileProbabilityChanged(tile);
 }
 
+void TilesetDocument::setTilePivot(Tile *tile, QPoint pivot)
+{
+    Q_ASSERT(tile->tileset() == mTileset.data());
+
+    if (tile->pivot() == pivot)
+        return;
+
+    tile->setPivot(pivot);
+
+    // Invalidate the draw margins of the maps using this tileset
+    for (MapDocument *mapDocument : mapDocuments())
+        mapDocument->map()->invalidateDrawMargins();
+
+    emit tilePivotChanged(tile);
+
+    for (MapDocument *mapDocument : mapDocuments()) {
+        emit mapDocument->tilePivotChanged(tile);
+        emit mapDocument->tilesetTilePositioningChanged(mTileset.data());
+    }
+}
+
 void TilesetDocument::swapTileObjectGroup(Tile *tile, std::unique_ptr<ObjectGroup> &objectGroup)
 {
     tile->swapObjectGroup(objectGroup);

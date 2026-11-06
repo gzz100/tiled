@@ -80,7 +80,7 @@ static QRectF cellRect(const MapRenderer &renderer,
         return QRectF();
 
     QPointF pixelCoords = renderer.tileToScreenCoords(tileCoords);
-    QPointF offset = tile->offset();
+    QPointF offset = tile->drawOffset();
     QSize size = tile->size();
 
     if (cell.flippedAntiDiagonally())

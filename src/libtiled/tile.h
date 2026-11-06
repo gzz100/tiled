@@ -91,6 +91,25 @@ public:
 
     QPoint offset() const;
 
+    /**
+     * Returns the offset at which the image of this tile should be drawn,
+     * relative to the position of the tile.
+     *
+     * This is the tile offset of the tileset, adjusted by the pivot of this
+     * tile.
+     */
+    QPoint drawOffset() const;
+
+    /**
+     * The pivot of the tile is the point of its image, in pixels relative to
+     * the top-left corner of the image, that is kept in place when the tile is
+     * drawn on the map. The default pivot is (0, 0), which means the image is
+     * drawn at its usual position, adjusted only by the tile offset of the
+     * tileset.
+     */
+    QPoint pivot() const;
+    void setPivot(const QPoint &pivot);
+
     // For Python API compatibility
     const QString &type() const { return className(); }
     void setType(const QString &type) { setClassName(type); };
@@ -121,6 +140,7 @@ private:
     mutable std::optional<QPainterPath> mImageShape;   // cache
     QUrl mImageSource;
     QRect mImageRect;
+    QPoint mPivot;
     LoadingStatus mImageStatus;
     qreal mProbability;
     std::unique_ptr<ObjectGroup> mObjectGroup;
@@ -196,6 +216,31 @@ inline QSize Tile::size() const
 }
 
 /**
+ * Returns the offset at which the image of this tile should be drawn, relative
+ * to the position of the tile.
+ *
+ * The pivot is subtracted from the tile offset, so that the pivot point of the
+ * image is aligned with the position of the tile.
+ *
+ * @see pivot
+ */
+inline QPoint Tile::drawOffset() const
+{
+    return offset() - mPivot;
+}
+
+/**
+ * Returns the pivot point of this tile, in pixels relative to the top-left
+ * corner of its image.
+ *
+ * @see setPivot
+ */
+inline QPoint Tile::pivot() const
+{
+    return mPivot;
+}
+
+/**
  * Returns the relative probability of this tile appearing while painting.
  */
 inline qreal Tile::probability() const
@@ -247,6 +292,33 @@ inline void Tile::setImageStatus(LoadingStatus status)
 {
     mImageStatus = status;
 }
+
+/**
+ * Name of the tile property used to persist the horizontal part of the pivot.
+ */
+extern TILEDSHARED_EXPORT const char * const pivotXPropertyName;
+
+/**
+ * Name of the tile property used to persist the vertical part of the pivot.
+ */
+extern TILEDSHARED_EXPORT const char * const pivotYPropertyName;
+
+/**
+ * Takes the pivot out of the given tile \a properties, if it is stored there.
+ *
+ * The properties are removed from \a properties, so they don't show up as
+ * regular custom properties of the tile. Returns \c std::nullopt when no pivot
+ * was stored in the given properties.
+ */
+TILEDSHARED_EXPORT std::optional<QPoint> takePivotFromProperties(Properties &properties);
+
+/**
+ * Stores the given \a pivot in the given tile \a properties.
+ *
+ * A null pivot is not stored, so that files of tiles without a custom pivot
+ * remain unchanged. Any previously stored pivot is replaced.
+ */
+TILEDSHARED_EXPORT void addPivotToProperties(const QPoint &pivot, Properties &properties);
 
 } // namespace Tiled
 

@@ -295,6 +295,8 @@ void TileCollisionDock::setTilesetDocument(TilesetDocument *tilesetDocument)
                 this, &TileCollisionDock::tileObjectGroupChanged);
         connect(mTilesetDocument, &TilesetDocument::tilesetTileOffsetChanged,
                 this, &TileCollisionDock::tilesetTileOffsetChanged);
+        connect(mTilesetDocument, &TilesetDocument::tilePivotChanged,
+                this, &TileCollisionDock::tilePivotChanged);
         connect(mTilesetDocument, &TilesetDocument::tilesetChanged,
                 this, &TileCollisionDock::tilesetChanged);
 
@@ -414,7 +416,7 @@ void TileCollisionDock::setTile(Tile *tile)
 
         TileLayer *tileLayer = new TileLayer(QString(), 0, 0, 1, 1);
         tileLayer->setCell(0, 0, Cell(tile));
-        tileLayer->setOffset(-tile->offset());  // undo tile offset
+        tileLayer->setOffset(-tile->drawOffset());  // undo tile offset and pivot
         map->addLayer(tileLayer);
 
         ObjectGroup *objectGroup;
@@ -543,10 +545,20 @@ void TileCollisionDock::tilesetTileOffsetChanged(Tileset *tileset)
         return;
 
     auto tileLayer = mDummyMapDocument->map()->layerAt(0);
-    auto tileOffset = tileset->tileOffset();
+
+    QPoint tileOffset = tileset->tileOffset();
+    if (mTile && mTile->tileset() == tileset)
+        tileOffset -= mTile->pivot();
+
     tileLayer->setOffset(-tileOffset);
 
     emit mDummyMapDocument->changed(LayerChangeEvent(tileLayer, LayerChangeEvent::OffsetProperty));
+}
+
+void TileCollisionDock::tilePivotChanged(Tile *tile)
+{
+    if (tile == mTile && mTilesetDocument)
+        tilesetTileOffsetChanged(mTilesetDocument->tileset().data());
 }
 
 void TileCollisionDock::tilesetChanged(Tileset *tileset)

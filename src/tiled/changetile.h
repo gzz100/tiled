@@ -66,4 +66,24 @@ protected:
     void setValue(Tile *tile, const QRect &rect) const override;
 };
 
+class ChangeTilePivot : public ChangeValue<Tile, QPoint>
+{
+public:
+    ChangeTilePivot(TilesetDocument *tilesetDocument,
+                    const QList<Tile*> &tiles,
+                    const QPoint &pivot,
+                    QUndoCommand *parent = nullptr);
+
+    ChangeTilePivot(TilesetDocument *tilesetDocument,
+                    const QList<Tile*> &tiles,
+                    const QVector<QPoint> &pivots,
+                    QUndoCommand *parent = nullptr);
+
+    int id() const override { return Cmd_ChangeTilePivot; }
+
+protected:
+    QPoint getValue(const Tile *tile) const override;
+    void setValue(Tile *tile, const QPoint &pivot) const override;
+};
+
 } // namespace Tiled
